@@ -301,6 +301,7 @@ func (c *ClusterCapacity) createSchedulerConfig(s *soptions.SchedulerServer) (*s
 	configFactory := factory.NewConfigFactory(s.SchedulerName,
 		c.externalkubeclient,
 		c.informerFactory.Core().V1().Nodes(),
+		c.informerFactory.Core().V1().Pods(),
 		c.informerFactory.Core().V1().PersistentVolumes(),
 		c.informerFactory.Core().V1().PersistentVolumeClaims(),
 		fakeInformerFactory.Core().V1().ReplicationControllers(),
@@ -341,6 +342,7 @@ func (c *ClusterCapacity) AddScheduler(s *soptions.SchedulerServer) error {
 		return err
 	}
 
+	// change to scheduler.NewFromConfigurator(...)
 	c.schedulers[s.SchedulerName] = scheduler.New(config)
 	c.schedulerConfigs[s.SchedulerName] = config
 	return nil
@@ -410,6 +412,7 @@ func New(s *soptions.SchedulerServer, simulatedPod *v1.Pod, maxPods int) (*Clust
 		return nil, fmt.Errorf("Unable to create cluster capacity analyzer: %v", err)
 	}
 
+	// change to scheduler.NewFromConfigurator(config)
 	cc.schedulers[s.SchedulerName] = scheduler.New(config)
 	cc.schedulerConfigs[s.SchedulerName] = config
 	cc.defaultScheduler = s.SchedulerName
