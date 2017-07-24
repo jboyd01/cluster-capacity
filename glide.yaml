@@ -6,7 +6,8 @@ import:
 - package: github.com/spf13/cobra
 - package: github.com/spf13/pflag
 - package: k8s.io/client-go
-  version: e36c1e5a16a708d8dd0a7475a9d6f8021c654d17
+  #version: e36c1e5a16a708d8dd0a7475a9d6f8021c654d17
+  version: release-4.0
   subpackages:
   - tools/clientcmd
   - tools/cache
