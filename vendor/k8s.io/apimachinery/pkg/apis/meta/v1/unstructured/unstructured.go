@@ -136,15 +136,10 @@ func getNestedInt64(obj map[string]interface{}, fields ...string) int64 {
 }
 
 func getNestedInt64Pointer(obj map[string]interface{}, fields ...string) *int64 {
-	nested := getNestedField(obj, fields...)
-	switch n := nested.(type) {
-	case int64:
-		return &n
-	case *int64:
-		return n
-	default:
-		return nil
+	if str, ok := getNestedField(obj, fields...).(*int64); ok {
+		return str
 	}
+	return nil
 }
 
 func getNestedSlice(obj map[string]interface{}, fields ...string) []string {
@@ -475,9 +470,6 @@ func (u *Unstructured) GetInitializers() *metav1.Initializers {
 }
 
 func (u *Unstructured) SetInitializers(initializers *metav1.Initializers) {
-	if u.Object == nil {
-		u.Object = make(map[string]interface{})
-	}
 	if initializers == nil {
 		setNestedField(u.Object, nil, "metadata", "initializers")
 		return
