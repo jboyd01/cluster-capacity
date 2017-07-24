@@ -18,8 +18,6 @@ package framework
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"sync"
 	"time"
 
@@ -37,10 +35,7 @@ import (
 	sapps "k8s.io/kubernetes/plugin/cmd/kube-scheduler/app"
 	soptions "k8s.io/kubernetes/plugin/cmd/kube-scheduler/app/options"
 	"k8s.io/kubernetes/plugin/pkg/scheduler"
-	schedulerapi "k8s.io/kubernetes/plugin/pkg/scheduler/api"
-	latestschedulerapi "k8s.io/kubernetes/plugin/pkg/scheduler/api/latest"
 	"k8s.io/kubernetes/plugin/pkg/scheduler/core"
-	"k8s.io/kubernetes/plugin/pkg/scheduler/factory"
 
 	// register algorithm providers
 	_ "k8s.io/kubernetes/plugin/pkg/scheduler/algorithmprovider"
@@ -313,7 +308,7 @@ func (c *ClusterCapacity) createScheduler(s *soptions.SchedulerServer) (*schedul
 		record.NewRecorder(10))
 
 	if err != nil {
-		return fmt.Errorf("error creating scheduler: %v", err)
+		return nil, fmt.Errorf("error creating scheduler: %v", err)
 	}
 	schedulerConfig := scheduler.Config()
 	// Replace the binder with simulator pod counter
@@ -386,8 +381,17 @@ func New(s *soptions.SchedulerServer, simulatedPod *v1.Pod, maxPods int) (*Clust
 	cc.schedulerConfigs = make(map[string]*scheduler.Config)
 
 	// change to scheduler.NewFromConfigurator(config)
-	cc.schedulers[s.SchedulerName] = scheduler
-	cc.schedulerConfigs[s.SchedulerName] = scheduler.Config
+	// cc.schedulers[s.SchedulerName] = scheduler
+	// cc.schedulerConfigs[s.SchedulerName] = scheduler.Config
+	// cc.defaultScheduler = s.SchedulerName
+
+	var err error
+	cc.schedulers[s.SchedulerName], err = cc.createScheduler(s)
+
+	if err != nil {
+		return nil, err
+	}
+
 	cc.defaultScheduler = s.SchedulerName
 
 	cc.stop = make(chan struct{})
