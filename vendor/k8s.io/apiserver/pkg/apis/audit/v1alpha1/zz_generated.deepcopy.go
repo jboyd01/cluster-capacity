@@ -21,10 +21,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	authentication_v1 "k8s.io/api/authentication/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	conversion "k8s.io/apimachinery/pkg/conversion"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	authentication_v1 "k8s.io/client-go/pkg/apis/authentication/v1"
 	reflect "reflect"
 )
 
@@ -58,14 +58,17 @@ func DeepCopy_v1alpha1_Event(in interface{}, out interface{}, c *conversion.Clon
 			out.ObjectMeta = *newVal.(*v1.ObjectMeta)
 		}
 		out.Timestamp = in.Timestamp.DeepCopy()
-		if err := authentication_v1.DeepCopy_v1_UserInfo(&in.User, &out.User, c); err != nil {
+		if newVal, err := c.DeepCopy(&in.User); err != nil {
 			return err
+		} else {
+			out.User = *newVal.(*authentication_v1.UserInfo)
 		}
 		if in.ImpersonatedUser != nil {
 			in, out := &in.ImpersonatedUser, &out.ImpersonatedUser
-			*out = new(authentication_v1.UserInfo)
-			if err := authentication_v1.DeepCopy_v1_UserInfo(*in, *out, c); err != nil {
+			if newVal, err := c.DeepCopy(*in); err != nil {
 				return err
+			} else {
+				*out = newVal.(*authentication_v1.UserInfo)
 			}
 		}
 		if in.SourceIPs != nil {
