@@ -335,7 +335,6 @@ func (c *ClusterCapacity) AddScheduler(s *soptions.SchedulerServer) error {
 		return err
 	}
 
-	// change to scheduler.NewFromConfigurator(...)
 	c.schedulers[s.SchedulerName] = scheduler
 	c.schedulerConfigs[s.SchedulerName] = scheduler.Config()
 	return nil
