@@ -174,7 +174,6 @@ func (c *ClusterCapacity) Bind(binding *v1.Binding, schedulerName string) error 
 	c.status.Pods = append(c.status.Pods, &updatedPod)
 	go func() {
 		<-c.schedulerConfigs[schedulerName].Recorder.(*record.Recorder).Events
-		//fmt.Printf("Scheduling event: %v\n", event)
 	}()
 
 	if c.maxSimulated > 0 && c.simulated >= c.maxSimulated {
@@ -380,20 +379,14 @@ func New(s *soptions.SchedulerServer, simulatedPod *v1.Pod, maxPods int) (*Clust
 	cc.schedulers = make(map[string]*scheduler.Scheduler)
 	cc.schedulerConfigs = make(map[string]*scheduler.Config)
 
-	// change to scheduler.NewFromConfigurator(config)
-	// cc.schedulers[s.SchedulerName] = scheduler
-	// cc.schedulerConfigs[s.SchedulerName] = scheduler.Config
-	// cc.defaultScheduler = s.SchedulerName
-
-	var err error
-	cc.schedulers[s.SchedulerName], err = cc.createScheduler(s)
-
+	scheduler, err := cc.createScheduler(s)
 	if err != nil {
 		return nil, err
 	}
 
+	cc.schedulers[s.SchedulerName] = scheduler
+	cc.schedulerConfigs[s.SchedulerName] = scheduler.Config()
 	cc.defaultScheduler = s.SchedulerName
-
 	cc.stop = make(chan struct{})
 	cc.informerStopCh = make(chan struct{})
 	return cc, nil
